@@ -43,7 +43,14 @@ async function run(){
             const query = { _id: ObjectId(id) };
             const result = await smartColletion.deleteOne(query);
             res.send(result);
-        })
+        });
+
+        //post // form or data received from client server
+        app.post('/inventory', async (req, res) => {
+            const newInventories = req.body;
+            const result = await smartColletion.insertOne(newInventories);
+            res.send(result);
+        });
     }
     finally{
 
