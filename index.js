@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
@@ -8,6 +9,24 @@ const port = process.env.PORT || 5000;
 // middle ware 
 app.use(cors());
 app.use(express.json());
+
+//JWT
+function varifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    console.log(authHeader);
+    if (!authHeader) {
+        return res.status(401).send({ message: 'Unauthorized Access' });
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+        if (err) {
+            return res.status(403).rsend({ message: 'Forbidden Access' });
+        }
+        console.log('decoded', decoded);
+        req.decoded = decoded;
+        next();
+    })
+}
 
 // mongo db 
 
@@ -51,6 +70,12 @@ async function run(){
             const result = await smartColletion.insertOne(newInventories);
             res.send(result);
         });
+
+        app.post('/login', async(req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {expiresIn: '2d'});
+            res.send(accessToken);
+        })
     }
     finally{
 
