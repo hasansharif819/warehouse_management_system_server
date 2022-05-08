@@ -36,6 +36,7 @@ async function run(){
     try{
         await client.connect();
         const smartColletion = client.db('smartPhone').collection('products');
+        const myItemCollection = client.db('smartPhone').collection('items');
 
         app.get('/products', async(req, res) => {
             const query = {};
@@ -77,25 +78,26 @@ async function run(){
             res.send(accessToken);
         });
 
-        app.get('/myitem', async(req, res) => {
-            const query = {};
-            const cursor = smartColletion.find(query);
-            const items = await cursor.toArray();
-            res.send(items);
-        })
+        app.post('/myitem', async (req, res) => {
+            const item = req.body;
+            const result = await myItemCollection.insertOne(item);
+            res.send(result);
+        });
 
-        app.post('/myitem', varifyJWT, async(req, res) => {
-            const decodedEmail = req.decoded.email;
+        app.get('/myitem', varifyJWT, async(req, res) => {
             const email = req.query.email;
-            if(decodedEmail === email){
+            // console.log(email);
+            // const decodedEmail = req.decoded.email;
+            // const email = req.query.email;
+            // if(decodedEmail === email){
                 const query = { email };
-                const cursor = smartColletion.find(query);
+                const cursor = myItemCollection.find(query);
                 const result = await cursor.toArray();
                 res.send(result);
-            }
-            else{
-                return req.status(403).send({message: 'Forbidden Access'});
-            }
+            // }
+            // else{
+            //     return req.status(403).send({message: 'Forbidden Access'});
+            // }
         })
     }
     finally{
