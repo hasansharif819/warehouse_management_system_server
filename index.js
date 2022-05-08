@@ -11,22 +11,22 @@ app.use(cors());
 app.use(express.json());
 
 //JWT
-function varifyJWT(req, res, next) {
-    const authHeader = req.headers.authorization;
-    console.log(authHeader);
-    if (!authHeader) {
-        return res.status(401).send({ message: 'Unauthorized Access' });
-    }
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
-        if (err) {
-            return res.status(403).rsend({ message: 'Forbidden Access' });
-        }
-        console.log('decoded', decoded);
-        req.decoded = decoded;
-        next();
-    })
-}
+// function varifyJWT(req, res, next) {
+//     const authHeader = req.headers.authorization;
+//     console.log(authHeader);
+//     if (!authHeader) {
+//         return res.status(401).send({ message: 'Unauthorized Access' });
+//     }
+//     const token = authHeader.split(' ')[1];
+//     jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+//         if (err) {
+//             return res.status(403).rsend({ message: 'Forbidden Access' });
+//         }
+//         console.log('decoded', decoded);
+//         req.decoded = decoded;
+//         next();
+//     })
+// }
 
 // mongo db 
 
@@ -83,22 +83,32 @@ async function run(){
             const result = await myItemCollection.insertOne(item);
             res.send(result);
         });
-
-        app.get('/myitem', varifyJWT, async(req, res) => {
+        
+        app.get('/myitem', async(req, res) => {
             const email = req.query.email;
-            // console.log(email);
-            // const decodedEmail = req.decoded.email;
-            // const email = req.query.email;
-            // if(decodedEmail === email){
-                const query = { email };
-                const cursor = myItemCollection.find(query);
-                const result = await cursor.toArray();
-                res.send(result);
-            // }
-            // else{
-            //     return req.status(403).send({message: 'Forbidden Access'});
-            // }
+            const query = { email };
+            const cursor = myItemCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
         })
+
+        // app.get('/myitem', varifyJWT, async(req, res) => {
+        //     const email = req.query.email;
+        //     console.log(email);
+        //     const decodedEmail = req.decoded.email;
+        //     // const email = req.query.email;
+        //     if(decodedEmail === email){
+        //         const query = { email };
+        //         const cursor = myItemCollection.find(query);
+        //         const result = await cursor.toArray();
+        //         res.send(result);
+        //         console.log(decodedEmail)
+        //     }
+        //     else{
+        //         return req.status(403).send({message: 'Forbidden Access'});
+        //         console.log('whats happened??')
+        //     }
+        // })
     }
     finally{
 
