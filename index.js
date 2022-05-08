@@ -75,6 +75,27 @@ async function run(){
             const user = req.body;
             const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {expiresIn: '2d'});
             res.send(accessToken);
+        });
+
+        app.get('/myitem', async(req, res) => {
+            const query = {};
+            const cursor = smartColletion.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
+        })
+
+        app.post('/myitem', varifyJWT, async(req, res) => {
+            const decodedEmail = req.decoded.email;
+            const email = req.query.email;
+            if(decodedEmail === email){
+                const query = { email };
+                const cursor = smartColletion.find(query);
+                const result = await cursor.toArray();
+                res.send(result);
+            }
+            else{
+                return req.status(403).send({message: 'Forbidden Access'});
+            }
         })
     }
     finally{
